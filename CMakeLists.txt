@@ -40,7 +40,7 @@ else(UNIX)
     find_package(GLEW REQUIRED)
 
     add_definitions(${GLEW_DEFINITIONS})
-    include_directories(${GLEW_INCLUDE_DIR} ${GLFW_INCLUDE_DIR})
+    include_directories(${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES} ${GLEW_INCLUDE_DIR} ${GLFW_INCLUDE_DIR})
     set(GL_LIBRARIES ${GLEW_LIBRARY} ${GLFW_LIBRARY} ${OPENGL_LIBRARY})
 endif(UNIX)
 
@@ -78,7 +78,8 @@ if(CMAKE_VERSION VERSION_LESS "3.23.0")
 elseif(CMAKE_VERSION VERSION_LESS "3.24.0")
     set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES CUDA_ARCHITECTURES all-major)
 else()
-    set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES CUDA_ARCHITECTURES native)
+    # native can fail if the GPU is temporarily unavailable; sm_89 = RTX 4070 Laptop
+    set_target_properties(${CMAKE_PROJECT_NAME} PROPERTIES CUDA_ARCHITECTURES "89")
 endif()
 target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE "$<$<AND:$<CONFIG:Debug,RelWithDebInfo>,$<COMPILE_LANGUAGE:CUDA>>:-G>")
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${CMAKE_PROJECT_NAME})
